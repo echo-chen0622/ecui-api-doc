@@ -40,7 +40,7 @@ public class AppConfig {
         controlMap.forEach((s, control) -> {
             //判断私有变量是否有冲突
             LinkedHashSet<Variable> variables = control.getVariables();
-            variables.forEach(variable -> variable.setRepeat(ecuiApiUtils.conflict(control,variable)));
+            variables.forEach(variable -> variable.setRepeat(Variable.conflict(control,variable)));
             controlJson.add(control.toJson());
         });
 

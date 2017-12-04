@@ -75,6 +75,22 @@ public class Variable{
     public Variable() {
     }
 
+    /**
+     * 递归法判断是否冲突
+     */
+    public static String conflict(Control control, Variable variable) {
+        Control parent = control.getParentNode();
+        if (parent != null) {
+            if (parent.getVariables().contains(variable)) {
+                System.out.println("变量可能重名：子控件文件路径："+variable.getControl().getPathFrom()+",控件名："+variable.getControl().getName()+",变量名："+variable.getName()+";父控件文件路径:"+parent.getPathFrom()+",控件名："+parent.getName()+"");
+                return "可能与"+parent.getPathFrom()+"文件中,"+parent.getName()+"控件下变量重名";
+            } else {
+                return conflict(parent, variable);
+            }
+        }
+        return "";
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -156,9 +156,9 @@ public class EcuiApiUtils {
 
             for (int i = 0; i < lineList.size(); i++) {
                 //当前所属控件（可能为空，意味着不在任何控件内
-                control = getControl(controlList, i);
+                control = getNowControl(i);
                 //当前所属方法(可能为空
-                method = getMethod(methodList, i);
+                method = getNowMethod(i);
                 String line = lineList.get(i).trim();
                 if (line.contains("core.inherits(")) {
                     //发现新的控件继承关系
@@ -498,11 +498,10 @@ public class EcuiApiUtils {
 
     /**
      * 获取当前控件
-     * @param controlList 控件表
      * @param lineNum 当前行
      * @return
      */
-    public Control getControl(LinkedList<Control> controlList, int lineNum) {
+    public Control getNowControl(int lineNum) {
         if (controlList.size() == 0) {
             return null;
         }
@@ -510,18 +509,17 @@ public class EcuiApiUtils {
         Control control = controlList.getLast();
         if (lineNum > control.getEndLine()) {
             controlList.removeLast();
-            getControl(controlList, lineNum);
+            getNowControl(lineNum);
         }
         return control;
     }
 
     /**
      * 获取当前方法
-     * @param methodList 方法表
      * @param lineNum 当前行
      * @return
      */
-    private Method getMethod(LinkedList<Method> methodList, int lineNum) {
+    private Method getNowMethod(int lineNum) {
         if (methodList.size() == 0) {
             return null;
         }
@@ -529,25 +527,9 @@ public class EcuiApiUtils {
         Method method = methodList.getLast();
         if (lineNum > method.getEndLine()) {
             methodList.removeLast();
-            getMethod(methodList, lineNum);
+            getNowMethod(lineNum);
         }
         return method;
-    }
-
-    /**
-     * 递归法判断是否冲突
-     */
-    public String conflict(Control control, Variable variable) {
-        Control parent = control.getParentNode();
-        if (parent != null) {
-            if (parent.getVariables().contains(variable)) {
-                System.out.println("变量可能重名：子控件文件路径："+variable.getControl().getPathFrom()+",控件名："+variable.getControl().getName()+",变量名："+variable.getName()+";父控件文件路径:"+parent.getPathFrom()+",控件名："+parent.getName()+"");
-                return "可能与"+parent.getPathFrom()+"文件中,"+parent.getName()+"控件下变量重名";
-            } else {
-                return conflict(parent, variable);
-            }
-        }
-        return "";
     }
 
     public Boolean startWithIgnoreCase(String src,String obj) {
