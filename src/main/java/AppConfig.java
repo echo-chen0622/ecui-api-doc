@@ -10,6 +10,7 @@ import static com.ecui.utils.FileUtils.makeFile;
 /**
  * @author chentiancheng
  */
+@SpringBootApplication
 public class AppConfig {
     public static void main(String[] args) {
 

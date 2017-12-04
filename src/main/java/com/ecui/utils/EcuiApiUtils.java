@@ -40,10 +40,6 @@ public class EcuiApiUtils {
      */
     private Map<String,Method> methodMap = new HashMap<>();
     /**
-     * 文件头注释上,'_'开头的变量 描述 map
-     */
-//    private LinkedHashMap<String, String> variableDescMap = new LinkedHashMap<>();
-    /**
      * 文件的行列表
      */
     private List<String> lineList;
