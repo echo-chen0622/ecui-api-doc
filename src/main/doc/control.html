@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>{foreach item="item" from=$control}{if $item.fileName==$URI1}{assign var="ccontrol" value=$item}{break}{/if}{/foreach}{foreach item="item" from=$control}{if $item.name==$ccontrol.parent}{assign var="super" value=$item}{break}{/if}{/foreach}
+<head>
+<title>{$ccontrol.name}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="javascript" src="../common/common.js"></script>
+<script language="javascript" src="../common/browdata.js"></script>
+<script language="javascript" src="../common/appliesto2.js"></script>
+<script language="javascript" src="../common/toolbar.js"></script>
+<script language="javascript" src="../common/prettify.js"></script>
+<link rel="stylesheet" type="text/css" href="../common/common.css" />
+<link rel="stylesheet" type="text/css" href="../common/prettify.css" />
+<style>
+BODY
+{
+font-family:verdana,arial,helvetica;
+padding:20px;
+}
+</style>
+</head>
+<body>
+<h1><a>{$ccontrol.name} {if $ccontrol.type=="unit"}部件{else}控件{/if}</a></h1>
+<hr size="1">
+{if $ccontrol.brief}<p>{$ccontrol.brief}</p>{/if}
+{if $super}<p>继承自 {$super.name|control}</p>{/if}
+<p><b>文件路径：</b>{$ccontrol.pathFrom}</p>
+{if $ccontrol.access}<p><b>访问控制：</b></font>{$ccontrol.access}</p>{/if}
+{if $ccontrol.style}<p><b>样式：</b>{$ccontrol.style}</p>{/if}
+
+{if $ccontrol.example}<p class="clsRef">使用方法</p>
+<blockquote>
+	<p>{$ccontrol.example}</p>
+</blockquote>{/if}
+
+{if $ccontrol.desc}<p class="clsRef">详情</p>
+<blockquote>
+	<p>{$ccontrol.desc}</p>
+</blockquote>{/if}
+
+<p class="clsRef">option支持的属性</p>
+<blockquote>
+  <table class="clsSTD">{foreach from=$ccontrol.optionParams item="item"}
+  {if !$item.isEvent}
+  <tr>
+    <td>{$item.name}</td>
+    <td>{$item.desc}</td>
+  </tr>
+  {/if}
+  {/foreach}
+  </table>
+</blockquote>
+
+<p class="clsRef">属性</p>
+<blockquote>
+	<table class="clsSTD">{foreach from=$ccontrol.variables item="item"}
+	<tr>
+		<td>{$item.name}</td>
+		<td>{if $item.desc}{$item.desc};{/if}
+		{if $item.repeat}<font color="red">{$item.repeat}{/if}</td>
+	</tr>
+		{/foreach}
+	</table>
+</blockquote>
+
+<p class="clsRef">方法</p>
+<blockquote>
+  <table class="clsSTD">{foreach from=$ccontrol.methods item="item"}
+  {if !$item.isEvent}
+  <tr>
+    <td>{$item.fileName|method}</td>
+    <td>{$item.brief}</td>
+  </tr>
+  {/if}
+  {/foreach}
+  </table>
+</blockquote>
+
+<p class="clsRef">事件</p>
+<blockquote>
+  <table class="clsSTD">{foreach from=$ccontrol.methods item="item"}
+  {if $item.isEvent}
+  <tr>
+    <td>{$item.fileName|method}</td>
+    <td>{$item.brief}</td>
+  </tr>
+  {/if}
+  {/foreach}
+  </table>
+</blockquote>
+
+<p class="clsRef">子类</p>
+<blockquote>
+  <table class="clsSTD">{foreach from=$ccontrol.children item="item"}
+  <tr>
+    <td>{$item.name|control}</td>
+    <td>{$item.brief}</td>
+  </tr>
+  {/foreach}
+  </table>
+</blockquote>
+
+<div style="text-align:right"><a href="../controls.html">返回</a></div>
+<script>
+if (document.getElementById('htmlDemo')) {
+    document.getElementById('htmlDemo').innerHTML = encodeHTML(formatHTML(document.getElementById('htmlDemo').innerHTML)).toLowerCase();
+    prettyPrint();
+}
+</script>
+</body>
+</html>

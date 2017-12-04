@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ordinary">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../ecui/doc/WEB-INF/lib/ordinary.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
