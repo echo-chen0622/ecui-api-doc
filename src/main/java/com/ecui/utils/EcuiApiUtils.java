@@ -97,68 +97,12 @@ public class EcuiApiUtils {
 
     //getter and setter start
 
-    public LinkedList<Control> getCurrentControlList() {
-        return currentControlList;
-    }
-
-    public void setCurrentControlList(LinkedList<Control> currentControlList) {
-        this.currentControlList = currentControlList;
-    }
-
-    public LinkedList<Method> getCurrentMethodList() {
-        return currentMethodList;
-    }
-
-    public void setCurrentMethodList(LinkedList<Method> currentMethodList) {
-        this.currentMethodList = currentMethodList;
-    }
-
-    public LinkedList<Method> getConstructionMethodList() {
-        return constructionMethodList;
-    }
-
-    public void setConstructionMethodList(LinkedList<Method> constructionMethodList) {
-        this.constructionMethodList = constructionMethodList;
-    }
-
     public Map<String, Control> getControlMap() {
         return controlMap;
     }
 
-    public void setControlMap(Map<String, Control> controlMap) {
-        this.controlMap = controlMap;
-    }
-
     public Set<Method> getMethodSet() {
         return methodSet;
-    }
-
-    public void setMethodSet(Set<Method> methodSet) {
-        this.methodSet = methodSet;
-    }
-
-    public List<String> getLineList() {
-        return lineList;
-    }
-
-    public void setLineList(List<String> lineList) {
-        this.lineList = lineList;
-    }
-
-    public Method getCurrentMethod() {
-        return currentMethod;
-    }
-
-    public void setCurrentMethod(Method currentMethod) {
-        this.currentMethod = currentMethod;
-    }
-
-    public Control getCurrentControl() {
-        return currentControl;
-    }
-
-    public void setCurrentControl(Control currentControl) {
-        this.currentControl = currentControl;
     }
 
     //getter and setter end
@@ -340,6 +284,8 @@ public class EcuiApiUtils {
                 }else if (startWithIgnoreCase(line,"@currentControl")){
                     currentControl.setType("currentControl");
                     currentControl.setStyle(lineList.get(currentControl.getStartLine()+2).trim().substring(1,lineList.get(currentControl.getStartLine()+2).trim().length()-2));
+                }else if (startWithIgnoreCase(line,"@control")){
+                    currentControl.setType("control");
                 }else if (startWithIgnoreCase(line,"@unit")){
                     currentControl.setType("unit");
                 }else {

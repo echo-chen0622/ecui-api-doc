@@ -1,6 +1,7 @@
 package com.ecui.utils;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -173,5 +174,34 @@ public class FileUtils {
             }
         }
         return endLine;
+    }
+
+    /**
+     * 从JAR中复制文件到磁盘
+     * @param srcFilePath：源路径，既JAR包中的资源文件，路径相对于CLASSPATH
+     * @param destFilePath：目标路径，磁盘上的任意路径，绝对路径（一般为用户选择的文件夹路径）
+     * @return int：返回执行后的状态；0：失败；1：成功；（可以扩充其它状态）
+     */
+    public static int fileCopy(String srcFilePath, String destFilePath){
+        int flag = 0;
+        File destFile = new File(destFilePath);
+        if (!destFile.getParentFile().exists()) {
+            destFile.getParentFile().mkdirs();
+        }
+        try {
+            BufferedInputStream fis = new BufferedInputStream(ClassLoader.getSystemResourceAsStream(srcFilePath));
+            FileOutputStream fos = new FileOutputStream(destFile);
+            byte[] buf = new byte[1024];
+            int c;
+            while ((c = fis.read(buf)) != -1) {
+                fos.write(buf, 0, c);
+            }
+            fis.close();
+            fos.close();
+            flag = 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return flag;
     }
 }

@@ -8,12 +8,15 @@ import com.ecui.utils.FileUtils;
 import com.ruixus.smarty4j.Context;
 import com.ruixus.smarty4j.Engine;
 import com.ruixus.smarty4j.Template;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import static com.ecui.utils.FileUtils.fileCopy;
 import static com.ecui.utils.FileUtils.judeDirExists;
 
 /**
@@ -55,7 +58,6 @@ public class Start {
 
         //生成文件
         Engine engine = new Engine();
-        engine.setTemplatePath(jarWholePath);
         Context context = new Context();
         context.set("controlTrees",controlList);
         context.set("controls",controlMapList);
@@ -65,14 +67,14 @@ public class Start {
         Template controlTem = engine.getTemplate("control.tpl");
         Template methodTem = engine.getTemplate("method.tpl");
         //控件树
-        String finalJarWholePath = jarWholePath;
-        String indexPath = new File(finalJarWholePath +"index").getAbsolutePath()+"\\";
+        String finalDocPath = jarPath+"/doc/";
+        String indexPath = new File(finalDocPath).getAbsolutePath()+"\\";
         judeDirExists(indexPath+"0");
         FileWriter fileWriter = new FileWriter(new File(indexPath+"controlTree.html").getAbsoluteFile());
         controlsTem.merge(context, fileWriter);
 
         //每个控件
-        String controlPath = new File(finalJarWholePath +"control").getAbsolutePath()+"\\";
+        String controlPath = new File(finalDocPath +"control").getAbsolutePath()+"\\";
         judeDirExists(controlPath+"0");
         controlMap.forEach((s, control) -> {
             try {
@@ -84,7 +86,7 @@ public class Start {
             }
         });
         //每个方法
-        String methodPath = new File(finalJarWholePath +"method/").getAbsolutePath()+"\\";
+        String methodPath = new File(finalDocPath +"method/").getAbsolutePath()+"\\";
         judeDirExists(methodPath+"0");
         methodSet.forEach(method -> {
             try {
@@ -95,5 +97,14 @@ public class Start {
                 e.printStackTrace();
             }
         });
+
+        //复制必要的js，css文件
+        fileCopy("common/appliesto2.js",finalDocPath+"common/appliesto2.js");
+        fileCopy("common/browdata.js",finalDocPath+"common/browdata.js");
+        fileCopy("common/common.js",finalDocPath+"common/common.js");
+        fileCopy("common/common.css",finalDocPath+"common/common.css");
+        fileCopy("common/prettify.css",finalDocPath+"common/prettify.css");
+        fileCopy("common/prettify.js",finalDocPath+"common/prettify.js");
+        fileCopy("common/toolbar.js",finalDocPath+"common/toolbar.js");
     }
 }

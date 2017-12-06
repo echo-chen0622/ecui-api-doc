@@ -2,6 +2,7 @@ package temp;
 
 import com.ruixus.smarty4j.Context;
 import com.ruixus.smarty4j.SafeContext;
+import com.ruixus.smarty4j.Template;
 import com.ruixus.smarty4j.TemplateWriter;
 import com.ruixus.smarty4j.statement.Definition;
 import com.ruixus.smarty4j.statement.LineFunction;
@@ -28,11 +29,15 @@ public class $control
         for (Map<String,Object> item : list) {
             if (item.get("fileName").equals(fileName))
             {
-                String path = (String)context.get("PATH");
-                String url = "<a href=\"" + (
-                        "/control/".equals(path) ? "" : "/".equals(path) ? "control/" :
-                                "../control/") + fileName + ".html\">" + item.get("name") +
-                        "</a>";
+                Template tpl = ctx.getTemplate();
+                String url;
+                if ("controls-include.tpl".equals(tpl.getName())){
+                    url = "<a href=\"./control/" + fileName + ".html\">" + item.get("name") +
+                            "</a>";
+                }else {
+                    url = "<a href=\"../control/" + fileName + ".html\">" + item.get("name") +
+                            "</a>";
+                }
                 writer.write(url);
             }
         }
