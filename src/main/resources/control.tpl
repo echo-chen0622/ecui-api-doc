@@ -26,6 +26,7 @@ padding:20px;
 <p><b>文件路径：</b>{$control.pathFrom}</p>
 {if $control.access}<p><b>访问控制：</b></font>{$control.access}</p>{/if}
 {if $control.style}<p><b>样式：</b>{$control.style}</p>{/if}
+{foreach from=$control.abnormal item="item"}{if $item == 1}<font color="red">构造方法中没有call()</font>{/if}{/foreach}
 
 {if $control.example}<p class="clsRef">使用方法</p>
 <blockquote>

@@ -43,12 +43,36 @@ public class Start {
         //控件详情
         List<Map<String,Object>> controlMapList = new ArrayList<>();
         controlMap.forEach((s, control) -> {
+            //判断属性是否有简介
+            if (control.getBrief()==null|| "".equals(control.getBrief())){
+                System.out.println("控件未添加中文名(简介)：文件路径："+control.getPathFrom()+",控件名："+control.getName());
+            }
             //判断私有变量是否有冲突
             LinkedHashSet<Variable> variables = control.getVariables();
-            variables.forEach(variable -> variable.setRepeat(Variable.conflict(control,variable)));
+            variables.forEach(variable -> {
+                //判断私有变量是否有冲突
+                variable.setRepeat(Variable.conflict(control,variable));
+                //判断变量是否有简介
+                if (variable.getDesc()==null|| "".equals(variable.getDesc())){
+                    System.out.println("变量未添加简介：文件路径："+control.getPathFrom()+
+                            ",所属控件："+control.getName()+
+                            ",变量名："+variable.getName()
+                    );
+                }
+            });
+            //判断方法(事件)是否有简介
+            LinkedHashSet<Method> methods = control.getMethods();
+            methods.forEach(method -> {
+                if (method.getBrief()==null|| "".equals(method.getBrief())){
+                    System.out.println("方法(事件)未添加简介：文件路径："+control.getPathFrom()+
+                            ",所属控件："+control.getName()+
+                            ",方法名："+method.getName()
+                    );
+                }
+            });
             controlMapList.add(control.toMap());
         });
-        //变量详情
+        //方法详情
         List<Map<String,Object>> methodSetList = new ArrayList<>();
         methodSet.forEach(method -> methodSetList.add(method.toMap()));
 

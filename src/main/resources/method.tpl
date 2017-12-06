@@ -31,9 +31,6 @@ padding:20px;
 		{else}访问控制属性：{$method.access}
 		</p>{/if}
 	{/if}
-	{foreach from=$method.abnormal item="item"}
-		{if $item == 1}<font color="red">"构造方法中没有call()"</font>{/if}
-	{/foreach}
 </blockquote>
 
 {if $method.result}
