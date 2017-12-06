@@ -127,7 +127,7 @@ public class FileUtils {
     }
 
     /**
-     * 判断文件夹是否存在
+     * 判断文件夹是否存在,若不存在，新增一个
      */
     public static void judeDirExists(String path) {
         File file = new File(path);

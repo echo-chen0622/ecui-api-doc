@@ -1,29 +1,41 @@
 package temp;
 
+import com.ruixus.smarty4j.Context;
+import com.ruixus.smarty4j.SafeContext;
+import com.ruixus.smarty4j.TemplateWriter;
+import com.ruixus.smarty4j.statement.Definition;
+import com.ruixus.smarty4j.statement.LineFunction;
+
 import java.util.List;
 import java.util.Map;
-import org.lilystudio.smarty4j.Context;
-import org.lilystudio.smarty4j.statement.AbstractCustomModifier;
 
 public class $control
-        extends AbstractCustomModifier
+        extends LineFunction
 {
-  @Override
-  protected Object execute(Context context, Object o, Object[] values)
-  {
-    List<Map<String, Object>> list = (List)context.get("control");
-    String name = (String)o;
-    for (Map<String, Object> item : list) {
-      if (item.get("name").equals(name))
-      {
-        String path = (String)context.get("PATH");
-        return "<a href=\"" + (
-                "/control/".equals(path) ? "" : "/".equals(path) ? "control/" :
-                        "../control/") + item.get("fileName") + ".html\">" + name +
-                "</a>";
-      }
+
+    /** 参数定义 */
+    private static final Definition[] definitions = {
+            Definition.forFunction("fileName", Definition.Type.OBJECT)};
+
+    @Override
+    public Definition[] getDefinitions() {
+        return definitions;
     }
 
-    return null;
-  }
+    public Object execute(SafeContext ctx, TemplateWriter writer, Object fileName) throws Exception {
+        Context context = (Context) ctx;
+        List<Map<String,Object>> list = (List<Map<String,Object>>)context.get("controls");
+        for (Map<String,Object> item : list) {
+            if (item.get("fileName").equals(fileName))
+            {
+                String path = (String)context.get("PATH");
+                String url = "<a href=\"" + (
+                        "/control/".equals(path) ? "" : "/".equals(path) ? "control/" :
+                                "../control/") + fileName + ".html\">" + item.get("name") +
+                        "</a>";
+                writer.write(url);
+            }
+        }
+        return null;
+    }
 }

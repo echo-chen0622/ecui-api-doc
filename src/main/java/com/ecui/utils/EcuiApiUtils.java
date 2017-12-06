@@ -1,5 +1,10 @@
 package com.ecui.utils;
 
+import com.ecui.domain.Control;
+import com.ecui.domain.Method;
+import com.ecui.domain.Param;
+import com.ecui.domain.Variable;
+
 import java.io.File;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -7,6 +12,7 @@ import java.util.regex.Pattern;
 
 import static com.ecui.utils.FileUtils.getEndLine;
 import static com.ecui.utils.FileUtils.getStartNoteLine;
+import static com.ecui.utils.StringUtils.*;
 
 
 /**
@@ -22,11 +28,11 @@ public class EcuiApiUtils {
     /**
      * 当前文件控件集合
      */
-    private LinkedList<Control> controlList;
+    private LinkedList<Control> currentControlList;
     /**
      * 当前文件方法集合
      */
-    private LinkedList<Method> methodList;
+    private LinkedList<Method> currentMethodList;
     /**
      * 构造方法及其子方法集合
      */
@@ -34,11 +40,11 @@ public class EcuiApiUtils {
     /**
      * 控件集合
      */
-    private Map<String,Control> controlMap = new HashMap<>();
+    private Map<String, Control> controlMap = new HashMap<>();
     /**
      * 方法集合
      */
-    private Map<String,Method> methodMap = new HashMap<>();
+    private Set<Method> methodSet = new HashSet<>();
     /**
      * 文件的行列表
      */
@@ -46,11 +52,11 @@ public class EcuiApiUtils {
     /**
      * 当前方法
      */
-    private Method method;
+    private Method currentMethod;
     /**
      * 当前控件
      */
-    private Control control;
+    private Control currentControl;
 
     /**
      * '_'开头的变量
@@ -89,6 +95,32 @@ public class EcuiApiUtils {
      */
     private static Pattern OPTIONS = Pattern.compile("(^[a-zA-Z]+)");
 
+    //getter and setter start
+
+    public LinkedList<Control> getCurrentControlList() {
+        return currentControlList;
+    }
+
+    public void setCurrentControlList(LinkedList<Control> currentControlList) {
+        this.currentControlList = currentControlList;
+    }
+
+    public LinkedList<Method> getCurrentMethodList() {
+        return currentMethodList;
+    }
+
+    public void setCurrentMethodList(LinkedList<Method> currentMethodList) {
+        this.currentMethodList = currentMethodList;
+    }
+
+    public LinkedList<Method> getConstructionMethodList() {
+        return constructionMethodList;
+    }
+
+    public void setConstructionMethodList(LinkedList<Method> constructionMethodList) {
+        this.constructionMethodList = constructionMethodList;
+    }
+
     public Map<String, Control> getControlMap() {
         return controlMap;
     }
@@ -97,12 +129,12 @@ public class EcuiApiUtils {
         this.controlMap = controlMap;
     }
 
-    public Map<String, Method> getMethodMap() {
-        return methodMap;
+    public Set<Method> getMethodSet() {
+        return methodSet;
     }
 
-    public void setMethodMap(Map<String, Method> methodMap) {
-        this.methodMap = methodMap;
+    public void setMethodSet(Set<Method> methodSet) {
+        this.methodSet = methodSet;
     }
 
     public List<String> getLineList() {
@@ -113,21 +145,23 @@ public class EcuiApiUtils {
         this.lineList = lineList;
     }
 
-    public Method getMethod() {
-        return method;
+    public Method getCurrentMethod() {
+        return currentMethod;
     }
 
-    public void setMethod(Method method) {
-        this.method = method;
+    public void setCurrentMethod(Method currentMethod) {
+        this.currentMethod = currentMethod;
     }
 
-    public Control getControl() {
-        return control;
+    public Control getCurrentControl() {
+        return currentControl;
     }
 
-    public void setControl(Control control) {
-        this.control = control;
+    public void setCurrentControl(Control currentControl) {
+        this.currentControl = currentControl;
     }
+
+    //getter and setter end
 
     /**
      * 获取树的各节点
@@ -142,23 +176,23 @@ public class EcuiApiUtils {
             String path = file.getPath();
             Matcher pathMatcher = PATH.matcher(path);
             if (pathMatcher.find()){
-                path = pathMatcher.group().replaceAll("\\\\","\\\\\\\\");
+                path = pathMatcher.group();
             }
             path = "..."+path;
             //将文件转换成行列表
             lineList = FileUtils.fileToLineList(file);
             //控件及其子控件集合
-            controlList = new LinkedList<>();
+            currentControlList = new LinkedList<>();
             //方法集合
-            methodList = new LinkedList<>();
+            currentMethodList = new LinkedList<>();
             //构造方法及其子方法集合
             constructionMethodList = new LinkedList<>();
 
             for (int i = 0; i < lineList.size(); i++) {
                 //当前所属控件（可能为空，意味着不在任何控件内
-                control = getNowControl(i);
+                currentControl = getCurrentControl(i);
                 //当前所属方法(可能为空
-                method = getNowMethod(i);
+                currentMethod = getCurrentMethod(i);
                 String line = lineList.get(i).trim();
                 if (line.contains("core.inherits(")) {
                     //发现新的控件继承关系
@@ -175,8 +209,8 @@ public class EcuiApiUtils {
                             node = "prototype." + node;
                             parentNode = parentNode.replaceFirst("prototype.", "");
                         }
-                        if (control != null) {
-                            node = control.getName() + "." + node;
+                        if (currentControl != null) {
+                            node = currentControl.getName() + "." + node;
                         } else {
                             //获得当前文件名（去后缀，首字母大写，将-{} 转换成大写
                             String fileName = file.getName().substring(0, file.getName().lastIndexOf("."));
@@ -201,7 +235,7 @@ public class EcuiApiUtils {
                         //扫描头部注释
                         scanFileHeader();
                     }
-                }else if(control != null) {
+                }else if(currentControl != null) {
                     //控件内代码
                     //正则匹配
                     Matcher variableMatcher = VARIABLE.matcher(line);
@@ -209,64 +243,42 @@ public class EcuiApiUtils {
                     Matcher constructionMethodMatcher = CONSTRUCTIONMETHOD.matcher(line);
                     //找'_'开头的变量
                     while (variableMatcher.find()) {
-                        Variable variable = new Variable(variableMatcher.group(),control);
-                        if (!control.getVariables().contains(variable)){
+                        Variable variable = new Variable(variableMatcher.group(), currentControl);
+                        if (!currentControl.getVariables().contains(variable)){
                             //没有找到同名变量则新增
-                            control.getVariables().add(variable);
+                            currentControl.getVariables().add(variable);
                         }
                     }
                     //匹配是否为方法
                     if (constructionMethodMatcher.find()) {
                         //构造方法
-                        newMethod("constructionMethod",true,constructionMethodList,i);
+                        getNewMethod("constructionMethod",true,constructionMethodList,i);
                     }else if (methodMatcher.find()){
                         //普通方法
-                        if (method!=null&&method.getConstruction()){
+                        if (currentMethod !=null&& currentMethod.getConstruction()){
                             //在构造方法内
-                            newMethod(methodMatcher.group(),true,constructionMethodList,i);
+                            getNewMethod(methodMatcher.group(),true,constructionMethodList,i);
                         }else {
                             //不在构造方法内
-                            if (method==null) {
-                                newMethod(methodMatcher.group(), false, methodList, i);
+                            if (currentMethod ==null) {
+                                getNewMethod(methodMatcher.group(), false, currentMethodList, i);
                                 //分析注释
                                 anlyzeNotesForMethod();
                             }
                         }
-                    }else if (method!=null){
+                    }else if (currentMethod !=null){
                         //方法内
-                        if (method.getConstruction()&& "constructionMethod".equals(method.getName())) {
+                        if (currentMethod.getConstruction()&& "constructionMethod".equals(currentMethod.getName())) {
                             //构造方法内
                             if (line.replaceAll(" ","").contains(".call(this,el,options)")){
                                 //包含.call()
-                                method.getAbnormal().remove(Method.Abnormal.HASNOCALL.getCode());
+                                currentMethod.getAbnormal().remove(Method.Abnormal.HASNOCALL.getCode());
                             }
                         }
                     }
                 }
             }
         });
-    }
-
-    public void getNewControl(String node,String parentNode,String path,int i){
-        //设置根节点的父节点为空
-        if ("null".equals(parentNode)) {
-            parentNode = null;
-        } else {
-            //去掉开头的"ui."
-            parentNode = parentNode.substring(3);
-        }
-        //集中处理控件节点
-        control = new Control();
-        control.setName(node);
-        control.setParentName(parentNode);
-        control.setStartLine(i);
-        control.setEndLine(getEndLine(lineList, i, '(', ')'));
-        control.setFileName(node.replace('.','-'));
-        control.setPathFrom(path);
-        //处理紧挨控件上面的注释
-        anlyzeNotesForControl();
-        controlList.add(control);
-        controlMap.put(node,control);
     }
 
     /**
@@ -280,7 +292,7 @@ public class EcuiApiUtils {
             String line = lineList.get(i);
             //对不是"属性","示例"的行操作
             if (line.startsWith("@")) {
-                System.out.println("注释中找到未知语法;文件:" + control.getPathFrom() + ",行数:" + i + ",语法:" + line);
+                System.out.println("注释中找到未知语法;文件:" + currentControl.getPathFrom() + ",行数:" + i + ",语法:" + line);
             }else if (!"属性".equals(line.trim())&&!"示例".equals(line.trim())){
                 //判断是否是变量的描述
                 Matcher variableNameMatcher = VARIABLENAME.matcher(line);
@@ -292,7 +304,7 @@ public class EcuiApiUtils {
                         //去掉'-'
                         variableDesc = variableDesc.substring(1,variableDesc.length()).trim();
                     }
-                    control.getVariables().add(new Variable(variableName,control,variableDesc));
+                    currentControl.getVariables().add(new Variable(variableName, currentControl,variableDesc));
                 }else {
                     //存入控件的详细描述
                     String html = escape(line);
@@ -300,65 +312,53 @@ public class EcuiApiUtils {
                 }
             }
         }
-        control.setExample(example);
-    }
-
-    /**
-     * 转义
-     * @param html
-     * @return
-     */
-    private String escape(String html) {
-        return  html.replaceAll("\"","&quot;")
-                .replaceAll("<","&lt;")
-                .replaceAll(">","&gt;")
-                .replaceAll(" ","&nbsp;");
+        currentControl.setExample(example);
     }
 
     /**
      * 解析控件的注释
      */
     private void anlyzeNotesForControl() {
-        int notesStartLine = getStartNoteLine(lineList,control.getStartLine()-1,"*/","/**");
+        int notesStartLine = getStartNoteLine(lineList, currentControl.getStartLine()-1,"*/","/**");
         if (notesStartLine == -1){
             return;
         }
         //解析注释
-        for (int i = notesStartLine+1; i < control.getStartLine()-1; i++) {
+        for (int i = notesStartLine+1; i < currentControl.getStartLine()-1; i++) {
             String line = lineList.get(i).trim();
-            control.getNotes().add(line);
+            currentControl.getNotes().add(line);
             //去掉开头的'*'
             line = line.substring(1).trim();
 
             if (line.startsWith("@")){
                 if (startWithIgnoreCase(line,"@public")){
-                    control.setAccess("public");
+                    currentControl.setAccess("public");
                 }else if (startWithIgnoreCase(line,"@protected")){
-                    control.setAccess("protected");
+                    currentControl.setAccess("protected");
                 }else if (startWithIgnoreCase(line,"@private")){
-                    control.setAccess("private");
-                }else if (startWithIgnoreCase(line,"@control")){
-                    control.setType("control");
-                    control.setStyle(lineList.get(control.getStartLine()+2).trim().substring(1,lineList.get(control.getStartLine()+2).trim().length()-2));
+                    currentControl.setAccess("private");
+                }else if (startWithIgnoreCase(line,"@currentControl")){
+                    currentControl.setType("currentControl");
+                    currentControl.setStyle(lineList.get(currentControl.getStartLine()+2).trim().substring(1,lineList.get(currentControl.getStartLine()+2).trim().length()-2));
                 }else if (startWithIgnoreCase(line,"@unit")){
-                    control.setType("unit");
+                    currentControl.setType("unit");
                 }else {
-                    System.out.println("注释中找到未知语法;文件:"+control.getPathFrom()+",行数:"+i+",语法:"+line);
+                    System.out.println("注释中找到未知语法;文件:"+ currentControl.getPathFrom()+",行数:"+i+",语法:"+line);
                 }
-            }else if (!"".equals(line)&&!"options 属性：".equals(line)){
+            }else if (!"".equals(line)&&!"options 属性：".equals(line)&&!"options 对象支持的属性如下：".equals(line)){
                 Matcher optionsMather = OPTIONS.matcher(line);
                 if (optionsMather.find()){
                     String paramName = optionsMather.group();
                     String paramDesc = line.replace(paramName,"").trim();
-                    control.getOptionParams().add(new Param(paramName,paramDesc));
+                    currentControl.getOptionParams().add(new Param(paramName,paramDesc));
                 }else {
                     String html = escape(line);
-                    if (!"".equals(control.getBrief())) {
+                    if (!"".equals(currentControl.getBrief())) {
                         //有简介
-                        control.setDesc(control.getDesc().concat(html) + "</br>");
+                        currentControl.setDesc(currentControl.getDesc().concat(html) + "</br>");
                     } else {
                         //没简介（中文名
-                        control.setBrief(html);
+                        currentControl.setBrief(html);
                     }
                 }
             }
@@ -369,49 +369,78 @@ public class EcuiApiUtils {
      * 解析方法的注释
      */
     private void anlyzeNotesForMethod() {
-        int notesStartLine = getStartNoteLine(lineList,method.getStartLine()-1,"*/","/**");
+        int notesStartLine = getStartNoteLine(lineList, currentMethod.getStartLine()-1,"*/","/**");
         if (notesStartLine == -1){
             return;
         }
         //解析注释
-        for (int i = notesStartLine+1; i < method.getStartLine()-1; i++) {
+        for (int i = notesStartLine+1; i < currentMethod.getStartLine()-1; i++) {
             String line = lineList.get(i).trim();
-            method.getNotes().add(line);
+            currentMethod.getNotes().add(line);
             line = line.substring(1).trim();
             if (line.startsWith("@")){
                 if (startWithIgnoreCase(line,"@param")){
                     String lineForParam = line.substring(6).trim();
-                    method.getParams().forEach(param -> {
+                    currentMethod.getParams().forEach(param -> {
                         if (lineForParam.contains(param.getName())){
                             param.setDesc(lineForParam);
                         }
                     });
                 }else if (startWithIgnoreCase(line,"@override")){
-                    method.setOverride(true);
+                    currentMethod.setOverride(true);
                 }else if (startWithIgnoreCase(line,"@return")){
-                    method.setResult(line.substring(7).trim());
+                    currentMethod.setResult(line.substring(7).trim());
                 }else if (startWithIgnoreCase(line,"@public")){
-                    method.setAccess("public");
+                    currentMethod.setAccess("public");
                 }else if (startWithIgnoreCase(line,"@protected")){
-                    method.setAccess("protected");
+                    currentMethod.setAccess("protected");
                 }else if (startWithIgnoreCase(line,"@private")){
-                    method.setAccess("private");
+                    currentMethod.setAccess("private");
                 }else if (startWithIgnoreCase(line,"@event")) {
-                    method.setEvent(true);
+                    currentMethod.setEvent(true);
                 }else {
-                    System.out.println("注释中找到未知语法;文件:"+method.getControl().getPathFrom()+",行数:"+i+",语法:"+line+"");
+                    System.out.println("注释中找到未知语法;文件:"+ currentMethod.getControl().getPathFrom()+",行数:"+i+",语法:"+line+"");
                 }
             }else if (!"".equals(line)){
                 String html = escape(line);
-                if (!"".equals(method.getBrief())){
+                if (!"".equals(currentMethod.getBrief())){
                     //有简介
-                    method.setDesc(method.getDesc().concat(html) + "</br>");
+                    currentMethod.setDesc(currentMethod.getDesc().concat(html) + "</br>");
                 }else {
                     //没简介（中文名
-                    method.setBrief(html);
+                    currentMethod.setBrief(html);
                 }
             }
         }
+    }
+
+    /**
+     * 获得一个新控件
+     * @param node
+     * @param parentNode
+     * @param path
+     * @param i
+     */
+    public void getNewControl(String node,String parentNode,String path,int i){
+        //设置根节点的父节点为空
+        if ("null".equals(parentNode)) {
+            parentNode = null;
+        } else {
+            //去掉开头的"ui."
+            parentNode = parentNode.substring(3);
+        }
+        //集中处理控件节点
+        currentControl = new Control();
+        currentControl.setName(node);
+        currentControl.setParentName(parentNode);
+        currentControl.setStartLine(i);
+        currentControl.setEndLine(getEndLine(lineList, i, '(', ')'));
+        currentControl.setFileName(node.replace('.','-'));
+        currentControl.setPathFrom(path);
+        //处理紧挨控件上面的注释
+        anlyzeNotesForControl();
+        currentControlList.add(currentControl);
+        controlMap.put(node,currentControl);
     }
 
     /**
@@ -421,79 +450,29 @@ public class EcuiApiUtils {
      * @param methodList
      * @param startNum
      */
-    public void newMethod(String name, Boolean isConstruction, LinkedList<Method> methodList, int startNum){
-        method = new Method(control,isConstruction, name, startNum, getEndLine(lineList, startNum, '{', '}'));
+    public void getNewMethod(String name, Boolean isConstruction, LinkedList<Method> methodList, int startNum){
+        currentMethod = new Method(currentControl,isConstruction, name, startNum, getEndLine(lineList, startNum, '{', '}'));
         if (isConstruction && "constructionMethod".equals(name)){
             //构造方法
-            method.setDesc("构造方法");
-            method.setBrief("构造方法");
-            method.getAbnormal().add(Method.Abnormal.HASNOCALL.getCode());
-            method.getParams().add(new Param("el"));
-            method.getParams().add(new Param("options"));
+            currentMethod.setDesc("构造方法");
+            currentMethod.setBrief("构造方法");
+            currentMethod.getAbnormal().add(Method.Abnormal.HASNOCALL.getCode());
+            currentMethod.getParams().add(new Param("el"));
+            currentMethod.getParams().add(new Param("options"));
         }else {
             //获取参数
             Matcher paramMatcher = PARAM.matcher(lineList.get(startNum).trim().replaceAll(" ",""));
             while (paramMatcher.find()) {
-                method.getParams().add(new Param(paramMatcher.group()));
+                currentMethod.getParams().add(new Param(paramMatcher.group()));
             }
             if (name.startsWith("$")){
-                method.setAccess("protected");
+                currentMethod.setAccess("protected");
             }
         }
-        method.setFileName(control.getFileName()+"-"+name);
-        methodList.add(method);
-        methodMap.put(method.getFileName(),method);
-        control.getMethods().add(method);
-    }
-
-    /**
-     * -转驼峰
-     *
-     * @param param 源字符串
-     * @return 转换后的字符串
-     */
-    public String joiner2Camel(String param, char joinner) {
-        if (param == null || "".equals(param.trim())) {
-            return "";
-        }
-        int len = param.length();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
-            char c = param.charAt(i);
-            if (c == joinner) {
-                if (++i < len) {
-                    sb.append(Character.toUpperCase(param.charAt(i)));
-                }
-            } else {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 驼峰法转 -
-     *
-     * @param line 源字符串
-     * @return 转换后的字符串
-     */
-    public String camel2Joiner(String line, char joiner) {
-        if (line==null||"".equals(line.trim())){
-            return "";
-        }
-        StringBuilder sb=new StringBuilder();
-        sb.append(line.substring(0,1));
-        line = line.substring(1,line.length());
-        for (int i = 0; i < line.length(); i++) {
-            char c=line.charAt(i);
-            if (Character.isUpperCase(c)){
-                sb.append(joiner);
-                sb.append(Character.toLowerCase(c));
-            }else{
-                sb.append(c);
-            }
-        }
-        return sb.toString();
+        currentMethod.setFileName(currentControl.getFileName()+"-"+name);
+        methodList.add(currentMethod);
+        methodSet.add(currentMethod);
+        currentControl.getMethods().add(currentMethod);
     }
 
     /**
@@ -501,15 +480,15 @@ public class EcuiApiUtils {
      * @param lineNum 当前行
      * @return
      */
-    public Control getNowControl(int lineNum) {
-        if (controlList.size() == 0) {
+    public Control getCurrentControl(int lineNum) {
+        if (currentControlList.size() == 0) {
             return null;
         }
         //获取当前控件
-        Control control = controlList.getLast();
+        Control control = currentControlList.getLast();
         if (lineNum > control.getEndLine()) {
-            controlList.removeLast();
-            getNowControl(lineNum);
+            currentControlList.removeLast();
+            getCurrentControl(lineNum);
         }
         return control;
     }
@@ -519,20 +498,17 @@ public class EcuiApiUtils {
      * @param lineNum 当前行
      * @return
      */
-    private Method getNowMethod(int lineNum) {
-        if (methodList.size() == 0) {
+    private Method getCurrentMethod(int lineNum) {
+        if (currentMethodList.size() == 0) {
             return null;
         }
         //获取当前方法
-        Method method = methodList.getLast();
+        Method method = currentMethodList.getLast();
         if (lineNum > method.getEndLine()) {
-            methodList.removeLast();
-            getNowMethod(lineNum);
+            currentMethodList.removeLast();
+            getCurrentMethod(lineNum);
         }
         return method;
     }
 
-    public Boolean startWithIgnoreCase(String src,String obj) {
-        return obj.length() <= src.length() && src.substring(0, obj.length()).equalsIgnoreCase(obj);
-    }
 }
