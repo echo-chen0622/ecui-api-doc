@@ -36,11 +36,11 @@ public class EcuiApiUtils {
     /**
      * 控件集合
      */
-    private Map<String, Control> controlMap = new HashMap<>();
+    private Map<String, Control> controlMap = new HashMap<String, Control>();
     /**
      * 方法集合
      */
-    private Set<Method> methodSet = new HashSet<>();
+    private Set<Method> methodSet = new HashSet<Method>();
     /**
      * 文件的行列表
      */
@@ -111,7 +111,7 @@ public class EcuiApiUtils {
     public void scanFile(Set<File> fileSet) {
 
         //循环遍历所有文件
-        fileSet.forEach((File file) -> {
+        for (File file : fileSet){
             //文件地址
             String path = file.getPath();
             Matcher pathMatcher = PATH.matcher(path);
@@ -122,9 +122,9 @@ public class EcuiApiUtils {
             //将文件转换成行列表
             lineList = FileUtils.fileToLineList(file);
             //控件及其子控件集合
-            currentControlList = new LinkedList<>();
+            currentControlList = new LinkedList<Control>();
             //方法集合
-            currentMethodList = new LinkedList<>();
+            currentMethodList = new LinkedList<Method>();
 
             for (int i = 0; i < lineList.size(); i++) {
                 //当前所属控件（可能为空，意味着不在任何控件内
@@ -216,7 +216,7 @@ public class EcuiApiUtils {
                     }
                 }
             }
-        });
+        }
     }
 
     /**
@@ -321,11 +321,11 @@ public class EcuiApiUtils {
             if (line.startsWith("@")){
                 if (startWithIgnoreCase(line,"@param")){
                     String lineForParam = line.substring(6).trim();
-                    currentMethod.getParams().forEach(param -> {
+                    for (Param param : currentMethod.getParams()){
                         if (lineForParam.contains(param.getName())){
                             param.setDesc(lineForParam);
                         }
-                    });
+                    }
                 }else if (startWithIgnoreCase(line,"@override")){
                     currentMethod.setOverride(true);
                 }else if (startWithIgnoreCase(line,"@return")){

@@ -31,11 +31,11 @@ public class Control {
     /**
      * 子节点集合
      */
-    private List<Control> children = new ArrayList<>();
+    private List<Control> children = new ArrayList<Control>();
     /**
      * 变量集合
      */
-    private LinkedHashSet<Variable> variables = new LinkedHashSet<>();
+    private LinkedHashSet<Variable> variables = new LinkedHashSet<Variable>();
     /**
      * 控件开始行
      */
@@ -55,7 +55,7 @@ public class Control {
     /**
      * 注释
      */
-    private List<String> notes = new ArrayList<>();
+    private List<String> notes = new ArrayList<String>();
     /**
      * 简述
      */
@@ -75,11 +75,11 @@ public class Control {
     /**
      * option的属性
      */
-    private LinkedHashSet<Param> optionParams = new LinkedHashSet<>();
+    private LinkedHashSet<Param> optionParams = new LinkedHashSet<Param>();
     /**
      * 方法集合
      */
-    private LinkedHashSet<Method> methods = new LinkedHashSet<>();
+    private LinkedHashSet<Method> methods = new LinkedHashSet<Method>();
     /**
      * 样式
      */
@@ -87,7 +87,7 @@ public class Control {
     /**
      * 异常
      */
-    private LinkedHashSet<Byte> abnormal = new LinkedHashSet<>();
+    private LinkedHashSet<Byte> abnormal = new LinkedHashSet<Byte>();
 
     // getter and setter start
 
@@ -289,8 +289,8 @@ public class Control {
      * @return 根节点集合
      */
     public static List<Control> getTree(Map<String,Control> controlMap){
-        List<Control> treeRoot = new ArrayList<>();
-        controlMap.forEach((s, control) -> {
+        List<Control> treeRoot = new ArrayList<Control>();
+        for (Control control : controlMap.values()){
             if (control.getParentName()!=null) {
                 Control parentNode = controlMap.get(control.getParentName());
                 if (parentNode == null){
@@ -302,12 +302,12 @@ public class Control {
             }else {
                 treeRoot.add(control);
             }
-        });
+        }
         return treeRoot;
     }
 
     public Map<String,Object> toSimpleMap(){
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map = new HashMap<String,Object>();
         map.put("name",name);
         map.put("brief",brief);
         map.put("fileName",fileName);
@@ -315,7 +315,7 @@ public class Control {
     }
 
     public Map<String, Object> toMap(){
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map = new HashMap<String,Object>();
         map.put("name",name);
         map.put("fileName",fileName);
         map.put("pathFrom",pathFrom);
@@ -328,18 +328,20 @@ public class Control {
         map.put("example",example);
         map.put("abnormal",abnormal.toArray());
         //子控件集合
-        LinkedList<Map<String,Object>> childList = new LinkedList<>();
-        children.forEach(child -> childList.add(child.toSimpleMap()));
+        LinkedList<Map<String,Object>> childList = new LinkedList<Map<String,Object>>();
+        for (Control child : children){
+            childList.add(child.toSimpleMap());
+        }
         map.put("children",childList);
         //option支持的属性
         map.put("optionParams",optionParams.toArray());
         //方法集合
-        LinkedList<Method> methodList = new LinkedList<>();
-        methods.forEach(method -> {
+        LinkedList<Method> methodList = new LinkedList<Method>();
+        for (Method method : methods){
             if (method.getConstruction()!=null&&!method.getConstruction()){
                 methodList.add(method);
             }
-        });
+        }
         map.put("methods",methodList);
         //变量集合
         map.put("variables",variables.toArray());

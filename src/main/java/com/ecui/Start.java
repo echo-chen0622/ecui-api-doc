@@ -41,15 +41,17 @@ public class Start {
         List<Control> controlList = Control.getTree(controlMap);
         //生成json,控件集合树
         //控件详情
-        List<Map<String,Object>> controlMapList = new ArrayList<>();
-        controlMap.forEach((s, control) -> {
+        List<Map<String,Object>> controlMapList = new ArrayList<Map<String, Object>>();
+
+        //遍历map中的值
+        for (Control control : controlMap.values()) {
             //判断属性是否有简介
             if (control.getBrief()==null|| "".equals(control.getBrief())){
                 System.out.println("控件未添加中文名(简介)：文件路径："+control.getPathFrom()+",控件名："+control.getName());
             }
             //判断私有变量是否有冲突
             LinkedHashSet<Variable> variables = control.getVariables();
-            variables.forEach(variable -> {
+            for (Variable variable : variables){
                 //判断私有变量是否有冲突
                 variable.setRepeat(Variable.conflict(control,variable));
                 //判断变量是否有简介
@@ -59,22 +61,25 @@ public class Start {
                             ",变量名："+variable.getName()
                     );
                 }
-            });
+            }
+
             //判断方法(事件)是否有简介
             LinkedHashSet<Method> methods = control.getMethods();
-            methods.forEach(method -> {
+            for (Method method : methods){
                 if (method.getBrief()==null|| "".equals(method.getBrief())){
                     System.out.println("方法(事件)未添加简介：文件路径："+control.getPathFrom()+
                             ",所属控件："+control.getName()+
                             ",方法名："+method.getName()
                     );
                 }
-            });
+            }
             controlMapList.add(control.toMap());
-        });
+        }
         //方法详情
-        List<Map<String,Object>> methodSetList = new ArrayList<>();
-        methodSet.forEach(method -> methodSetList.add(method.toMap()));
+        List<Map<String,Object>> methodSetList = new ArrayList<Map<String,Object>>();
+        for (Method method : methodSet){
+            methodSetList.add(method.toMap());
+        }
 
         //生成文件
         Engine engine = new Engine();
@@ -96,7 +101,7 @@ public class Start {
         //每个控件
         String controlPath = new File(finalDocPath +"control").getAbsolutePath()+"\\";
         judeDirExists(controlPath+"0");
-        controlMap.forEach((s, control) -> {
+        for (Control control : controlMap.values()){
             try {
                 FileOutputStream controlWriter = new FileOutputStream(controlPath+control.getFileName()+".html");
                 context.set("control", control.toMap());
@@ -104,11 +109,11 @@ public class Start {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        }
         //每个方法
         String methodPath = new File(finalDocPath +"method/").getAbsolutePath()+"\\";
         judeDirExists(methodPath+"0");
-        methodSet.forEach(method -> {
+        for (Method method : methodSet){
             try {
                 FileOutputStream controlWriter = new FileOutputStream(methodPath+method.getFileName()+".html");
                 context.set("method",method.toMap());
@@ -116,7 +121,7 @@ public class Start {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        }
 
         //复制必要的js，css文件
         fileCopy("common/appliesto2.js",finalDocPath+"common/appliesto2.js");

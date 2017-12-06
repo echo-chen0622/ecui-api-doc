@@ -4,6 +4,7 @@ import java.util.*;
 
 /**
  * 方法
+ * @author chentiancheng
  */
 public class Method{
     /**
@@ -33,7 +34,7 @@ public class Method{
     /**
      * 参数
      */
-    private LinkedHashSet<Param> params = new LinkedHashSet<>();
+    private LinkedHashSet<Param> params = new LinkedHashSet<Param>();
     /**
      * 返回值
      */
@@ -61,7 +62,7 @@ public class Method{
     /**
      * 注释
      */
-    private List<String> notes = new ArrayList<>();
+    private List<String> notes = new ArrayList<String>();
 
     public Boolean getEvent() {
         return isEvent;
@@ -202,7 +203,7 @@ public class Method{
     }
 
     public Map<String,Object> toMap(){
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map = new HashMap<String,Object>();
         map.put("name",name);
         map.put("desc",desc);
         map.put("result",result);

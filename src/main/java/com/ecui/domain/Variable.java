@@ -2,6 +2,7 @@ package com.ecui.domain;
 
 /**
  * 变量
+ * @author chentiancheng
  */
 public class Variable{
     /**

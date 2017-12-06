@@ -2,6 +2,7 @@ package com.ecui.domain;
 
 /**
  * 参数
+ * @author chentiancheng
  */
 public class Param{
     /**

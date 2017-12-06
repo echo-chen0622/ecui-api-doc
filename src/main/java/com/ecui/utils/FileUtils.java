@@ -25,7 +25,7 @@ public class FileUtils {
      */
     public static Set<File> getFileLists(String path, String... types){
         File file=new File(path);
-        Set<File> fileSet = new HashSet<>();
+        Set<File> fileSet = new HashSet<File>();
         return getFile(file,fileSet,types);
     }
 
@@ -69,7 +69,7 @@ public class FileUtils {
      */
     public static List<String> fileToLineList(File file){
         BufferedReader reader;
-        List<String> lineList = new ArrayList<>();
+        List<String> lineList = new ArrayList<String>();
         try {
             String line;
             InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "UTF-8");
