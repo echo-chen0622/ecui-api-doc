@@ -72,7 +72,8 @@ public class FileUtils {
         List<String> lineList = new ArrayList<>();
         try {
             String line;
-            reader = new BufferedReader(new FileReader(file));
+            InputStreamReader isr = new InputStreamReader(new FileInputStream(file), "UTF-8");
+            reader = new BufferedReader(isr);
             while ((line = reader.readLine())!=null){
                 lineList.add(line);
             }

@@ -8,12 +8,8 @@ import com.ecui.utils.FileUtils;
 import com.ruixus.smarty4j.Context;
 import com.ruixus.smarty4j.Engine;
 import com.ruixus.smarty4j.Template;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
 
 import static com.ecui.utils.FileUtils.fileCopy;
@@ -70,7 +66,7 @@ public class Start {
         String finalDocPath = jarPath+"/doc/";
         String indexPath = new File(finalDocPath).getAbsolutePath()+"\\";
         judeDirExists(indexPath+"0");
-        FileWriter fileWriter = new FileWriter(new File(indexPath+"controlTree.html").getAbsoluteFile());
+        FileOutputStream fileWriter = new FileOutputStream(new File(indexPath+"controlTree.html").getAbsoluteFile());
         controlsTem.merge(context, fileWriter);
 
         //每个控件
@@ -78,7 +74,7 @@ public class Start {
         judeDirExists(controlPath+"0");
         controlMap.forEach((s, control) -> {
             try {
-                FileWriter controlWriter = new FileWriter(controlPath+control.getFileName()+".html");
+                FileOutputStream controlWriter = new FileOutputStream(controlPath+control.getFileName()+".html");
                 context.set("control", control.toMap());
                 controlTem.merge(context, controlWriter);
             } catch (Exception e) {
@@ -90,7 +86,7 @@ public class Start {
         judeDirExists(methodPath+"0");
         methodSet.forEach(method -> {
             try {
-                FileWriter controlWriter = new FileWriter(methodPath+method.getFileName()+".html");
+                FileOutputStream controlWriter = new FileOutputStream(methodPath+method.getFileName()+".html");
                 context.set("method",method.toMap());
                 methodTem.merge(context, controlWriter);
             } catch (Exception e) {
