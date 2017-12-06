@@ -23,10 +23,6 @@ public class Method{
      */
     private Control control;
     /**
-     * 异常
-     */
-    private LinkedHashSet<Byte> abnormal = new LinkedHashSet<>();
-    /**
      * 简述
      */
     private String brief = "";
@@ -193,14 +189,6 @@ public class Method{
         this.control = control;
     }
 
-    public LinkedHashSet<Byte> getAbnormal() {
-        return abnormal;
-    }
-
-    public void setAbnormal(LinkedHashSet<Byte> abnormal) {
-        this.abnormal = abnormal;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -222,7 +210,6 @@ public class Method{
         map.put("isOverride",isOverride);
         map.put("fileName",fileName);
         map.put("isEvent",isEvent);
-        map.put("abnormal",abnormal.toArray());
         map.put("params",params.toArray());
         map.put("control",control.toSimpleMap());
         return map;
@@ -250,37 +237,4 @@ public class Method{
         return result;
     }
 
-    /**
-     * 异常
-     */
-    public enum Abnormal{
-        /**
-         * 构造方法中没有call()
-         */
-        HASNOCALL((byte) 1,"构造方法中没有call()");
-
-        Abnormal(Byte code, String value) {
-            this.code = code;
-            this.value = value;
-        }
-
-        Byte code;
-        String value;
-
-        public Byte getCode() {
-            return code;
-        }
-
-        public void setCode(Byte code) {
-            this.code = code;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-    }
 }

@@ -34,10 +34,6 @@ public class EcuiApiUtils {
      */
     private LinkedList<Method> currentMethodList;
     /**
-     * 构造方法及其子方法集合
-     */
-    private LinkedList<Method> constructionMethodList;
-    /**
      * 控件集合
      */
     private Map<String, Control> controlMap = new HashMap<>();
@@ -129,8 +125,6 @@ public class EcuiApiUtils {
             currentControlList = new LinkedList<>();
             //方法集合
             currentMethodList = new LinkedList<>();
-            //构造方法及其子方法集合
-            constructionMethodList = new LinkedList<>();
 
             for (int i = 0; i < lineList.size(); i++) {
                 //当前所属控件（可能为空，意味着不在任何控件内
@@ -196,16 +190,16 @@ public class EcuiApiUtils {
                     //匹配是否为方法
                     if (constructionMethodMatcher.find()) {
                         //构造方法
-                        getNewMethod("constructionMethod",true,constructionMethodList,i);
+                        getNewMethod("constructionMethod",true,i);
                     }else if (methodMatcher.find()){
                         //普通方法
                         if (currentMethod !=null&& currentMethod.getConstruction()){
                             //在构造方法内
-                            getNewMethod(methodMatcher.group(),true,constructionMethodList,i);
+                            getNewMethod(methodMatcher.group(),true,i);
                         }else {
                             //不在构造方法内
                             if (currentMethod ==null) {
-                                getNewMethod(methodMatcher.group(), false, currentMethodList, i);
+                                getNewMethod(methodMatcher.group(), false, i);
                                 //分析注释
                                 anlyzeNotesForMethod();
                             }
@@ -216,7 +210,7 @@ public class EcuiApiUtils {
                             //构造方法内
                             if (line.replaceAll(" ","").contains(".call(this,el,options)")){
                                 //包含.call()
-                                currentMethod.getAbnormal().remove(Method.Abnormal.HASNOCALL.getCode());
+                                currentControl.getAbnormal().remove(Control.Abnormal.HASNOCALL.getCode());
                             }
                         }
                     }
@@ -380,6 +374,9 @@ public class EcuiApiUtils {
         currentControl.setName(node);
         currentControl.setParentName(parentNode);
         currentControl.setStartLine(i);
+        if (parentNode!=null) {
+            currentControl.getAbnormal().add(Control.Abnormal.HASNOCALL.getCode());
+        }
         currentControl.setEndLine(getEndLine(lineList, i, '(', ')'));
         currentControl.setFileName(node.replace('.','-'));
         currentControl.setPathFrom(path);
@@ -393,16 +390,14 @@ public class EcuiApiUtils {
      * 对新方法的所有操作
      * @param name
      * @param isConstruction
-     * @param methodList
      * @param startNum
      */
-    public void getNewMethod(String name, Boolean isConstruction, LinkedList<Method> methodList, int startNum){
+    public void getNewMethod(String name, Boolean isConstruction, int startNum){
         currentMethod = new Method(currentControl,isConstruction, name, startNum, getEndLine(lineList, startNum, '{', '}'));
         if (isConstruction && "constructionMethod".equals(name)){
             //构造方法
             currentMethod.setDesc("构造方法");
             currentMethod.setBrief("构造方法");
-            currentMethod.getAbnormal().add(Method.Abnormal.HASNOCALL.getCode());
             currentMethod.getParams().add(new Param("el"));
             currentMethod.getParams().add(new Param("options"));
         }else {
@@ -416,7 +411,7 @@ public class EcuiApiUtils {
             }
         }
         currentMethod.setFileName(currentControl.getFileName()+"-"+name);
-        methodList.add(currentMethod);
+        currentMethodList.add(currentMethod);
         methodSet.add(currentMethod);
         currentControl.getMethods().add(currentMethod);
     }

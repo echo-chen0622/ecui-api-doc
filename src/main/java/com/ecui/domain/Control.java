@@ -84,8 +84,21 @@ public class Control {
      * 样式
      */
     private String style;
+    /**
+     * 异常
+     */
+    private LinkedHashSet<Byte> abnormal = new LinkedHashSet<>();
 
     // getter and setter start
+
+    public LinkedHashSet<Byte> getAbnormal() {
+        return abnormal;
+    }
+
+    public void setAbnormal(LinkedHashSet<Byte> abnormal) {
+        this.abnormal = abnormal;
+    }
+
     public void setVariables(LinkedHashSet<Variable> variables) {
         this.variables = variables;
     }
@@ -313,6 +326,7 @@ public class Control {
         map.put("type",type);
         map.put("style",style);
         map.put("example",example);
+        map.put("abnormal",abnormal.toArray());
         //子控件集合
         LinkedList<Map<String,Object>> childList = new LinkedList<>();
         children.forEach(child -> childList.add(child.toSimpleMap()));
@@ -320,10 +334,48 @@ public class Control {
         //option支持的属性
         map.put("optionParams",optionParams.toArray());
         //方法集合
-        map.put("methods",methods.toArray());
+        LinkedList<Method> methodList = new LinkedList<>();
+        methods.forEach(method -> {
+            if (method.getConstruction()!=null&&!method.getConstruction()){
+                methodList.add(method);
+            }
+        });
+        map.put("methods",methodList);
         //变量集合
         map.put("variables",variables.toArray());
         return map;
     }
+    /**
+     * 异常
+     */
+    public enum Abnormal{
+        /**
+         * 构造方法中没有call()
+         */
+        HASNOCALL((byte) 1,"构造方法中没有call()");
 
+        Abnormal(Byte code, String value) {
+            this.code = code;
+            this.value = value;
+        }
+
+        Byte code;
+        String value;
+
+        public Byte getCode() {
+            return code;
+        }
+
+        public void setCode(Byte code) {
+            this.code = code;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
 }
