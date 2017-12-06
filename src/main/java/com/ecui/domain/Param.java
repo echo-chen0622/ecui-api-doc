@@ -4,9 +4,13 @@ package com.ecui.domain;
  * 参数
  */
 public class Param{
-    //名称
+    /**
+     * 名称
+     */
     private String name;
-    //描述
+    /**
+     * 描述
+     */
     private String desc;
 
     public Param() {
