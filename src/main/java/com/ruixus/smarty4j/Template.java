@@ -161,8 +161,6 @@ public class Template {
 	 * 
 	 * @param path
 	 *            相对地址描述
-	 * @param isTemplateName
-	 *            <tt>true</tt>表示计算模板的名称; <tt>false</tt>表示计算绝对路径
 	 * @return 转换后的文件名
 	 * @see com.ruixus.smarty4j.statement.function.$include
 	 */
@@ -297,7 +295,7 @@ public class Template {
 	 * 
 	 * @param ctx
 	 *            数据容器
-	 * @param out
+	 * @param writer
 	 *            输出对象
 	 */
 	public void merge(Context ctx, TemplateWriter writer) throws Exception {
