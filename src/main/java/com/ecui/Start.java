@@ -93,13 +93,13 @@ public class Start {
         Template methodTem = engine.getTemplate("method.tpl");
         //控件树
         String finalDocPath = jarPath+"/doc/";
-        String indexPath = new File(finalDocPath).getAbsolutePath()+"\\";
+        String indexPath = new File(finalDocPath).getAbsolutePath()+"/";
         judeDirExists(indexPath+"0");
         FileOutputStream fileWriter = new FileOutputStream(new File(indexPath+"controlTree.html").getAbsoluteFile());
         controlsTem.merge(context, fileWriter);
 
         //每个控件
-        String controlPath = new File(finalDocPath +"control").getAbsolutePath()+"\\";
+        String controlPath = new File(finalDocPath +"control").getAbsolutePath()+"/";
         judeDirExists(controlPath+"0");
         for (Control control : controlMap.values()){
             try {
@@ -111,7 +111,7 @@ public class Start {
             }
         }
         //每个方法
-        String methodPath = new File(finalDocPath +"method/").getAbsolutePath()+"\\";
+        String methodPath = new File(finalDocPath +"method/").getAbsolutePath()+"/";
         judeDirExists(methodPath+"0");
         for (Method method : methodSet){
             try {

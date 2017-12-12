@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="ordinary">
+  <library name="asm-4.2">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../ecui/doc/WEB-INF/lib/ordinary.jar!/" />
+      <root url="jar://$PROJECT_DIR$/src/main/lib/asm-4.2.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
