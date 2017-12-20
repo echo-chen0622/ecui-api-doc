@@ -84,45 +84,19 @@ public class FileUtils {
         return lineList;
     }
 
-    public static int getEndLine(List<String> lineList,int startLine,char startRule,char endRule){
-        //第一行没有开始字符
-        if (!lineList.get(startLine).contains(String.valueOf(startRule))){
-            return startLine;
-        }
-        int endLine = startLine;
-        int num = 0;
-        A : for (int scanLine = startLine;scanLine<lineList.size();scanLine++){
-            String line = lineList.get(scanLine);
-            for (int i=0;i<line.length();i++){
-                char c = line.charAt(i);
-                if (c == startRule){
-                    num++;
-                }else if (c == endRule){
-                    num--;
-                    if (num == 0&&scanLine>startLine){
-                        endLine = scanLine;
-                        break A;
-                    }
-                }
-            }
-        }
-        return endLine;
-    }
-
     /**
      * 创建文件
      * @param path
      * @param fileName
      * @param fileContent
      */
-    public static void makeFile(String path,String fileName, String fileContent){
+    public static void createFile(String path,String fileName, String fileContent){
         try {
             //判断文件夹是否存在
             judeDirExists(path+fileName);
-
-            FileOutputStream fileOut = new FileOutputStream(path+fileName);
-            fileOut.write(fileContent.getBytes());
-            fileOut.close();
+            OutputStreamWriter oStreamWriter = new OutputStreamWriter(new FileOutputStream(path+fileName), "utf-8");
+            oStreamWriter.append(fileContent);
+            oStreamWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -176,6 +150,32 @@ public class FileUtils {
         }
         return endLine;
     }
+
+    public static int getEndLine(List<String> lineList,int startLine,char startRule,char endRule){
+        //第一行没有开始字符
+        if (!lineList.get(startLine).contains(String.valueOf(startRule))){
+            return startLine;
+        }
+        int endLine = startLine;
+        int num = 0;
+        A : for (int scanLine = startLine;scanLine<lineList.size();scanLine++){
+            String line = lineList.get(scanLine);
+            for (int i=0;i<line.length();i++){
+                char c = line.charAt(i);
+                if (c == startRule){
+                    num++;
+                }else if (c == endRule){
+                    num--;
+                    if (num == 0&&scanLine>startLine){
+                        endLine = scanLine;
+                        break A;
+                    }
+                }
+            }
+        }
+        return endLine;
+    }
+
 
     /**
      * 从JAR中复制文件到磁盘

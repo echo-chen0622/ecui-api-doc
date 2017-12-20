@@ -9,7 +9,9 @@ import com.ruixus.smarty4j.Context;
 import com.ruixus.smarty4j.Engine;
 import com.ruixus.smarty4j.Template;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static com.ecui.utils.FileUtils.fileCopy;
