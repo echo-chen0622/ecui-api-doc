@@ -9,8 +9,8 @@
 				{/if}
 			</tr>
 		</table>
-	</blockquote>	
-	
+	</blockquote>
+
 	<div class="uchildren">
 	{if $item.children}
 	<ul>

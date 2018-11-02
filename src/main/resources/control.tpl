@@ -22,7 +22,7 @@ padding:20px;
 <h1><a>{$control.name} {if $control.type=="unit"}部件{else}控件{/if}</a></h1>
 <hr size="1">
 {if $control.brief}<p>{$control.brief}</p>{/if}
-{if $control.parent}<p>继承自 {control fileName=$control.parent}</p>{/if}
+{if $control.parent}<p>继承自 {control fileName=$control.parentFileName}</p>{/if}
 <p><b>文件路径：</b>{$control.pathFrom}</p>
 {if $control.access}<p><b>访问控制：</b></font>{$control.access}</p>{/if}
 {if $control.style}<p><b>样式：</b>{$control.style}</p>{/if}

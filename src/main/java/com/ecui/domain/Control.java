@@ -25,6 +25,10 @@ public class Control {
      */
     private String parentName;
     /**
+     * 父节点文件名称
+     */
+    private String parentFileName;
+    /**
      * 父节点
      */
     private Control parentNode;
@@ -90,6 +94,14 @@ public class Control {
     private LinkedHashSet<Byte> abnormal = new LinkedHashSet<Byte>();
 
     // getter and setter start
+
+    public String getParentFileName() {
+        return parentFileName;
+    }
+
+    public void setParentFileName(String parentFileName) {
+        this.parentFileName = parentFileName;
+    }
 
     public LinkedHashSet<Byte> getAbnormal() {
         return abnormal;
@@ -296,20 +308,19 @@ public class Control {
             try {
                 if (control.getParentName() != null) {
                     String parentName = control.getParentName();
-                    if (parentName.contains("prototype")){
-                        parentName = parentName.replace("prototype","");
-                    }
                     Control parentNode = controlMap.get(parentName);
                     if (parentNode == null) {
                         System.out.println("parentNode is null: "+control);
                         Control parentControl = new Control();
                         parentControl.setName(parentName);
-                        parentControl.setStartLine(0);
-                        parentControl.setEndLine(0);
-                        controlMap.put("parentName",control);
+                        parentControl.setFileName(parentName.replace('.','-'));
+                        parentControl.setBrief("默认建立节点");
                         parentNode = parentControl;
+                        controlMap.put(parentName,parentNode);
+                        treeRoot.add(parentNode);
                     }
                     control.setParentNode(parentNode);
+                    control.setParentFileName(parentNode.getFileName());
                     parentNode.getChildren().add(control);
                 } else {
                     treeRoot.add(control);
@@ -338,6 +349,7 @@ public class Control {
         map.put("brief",brief);
         map.put("desc",desc);
         map.put("parent",parentName);
+        map.put("parentFileName",parentFileName);
         map.put("access",access);
         map.put("type",type);
         map.put("style",style);
