@@ -290,17 +290,33 @@ public class Control {
      */
     public static List<Control> getTree(Map<String,Control> controlMap){
         List<Control> treeRoot = new ArrayList<Control>();
-        for (Control control : controlMap.values()){
-            if (control.getParentName()!=null) {
-                Control parentNode = controlMap.get(control.getParentName());
-                if (parentNode == null){
-                    System.out.println(control);
+        Map<String,Control> map = new HashMap<String, Control>();
+        map.putAll(controlMap);
+        for (Control control : map.values()){
+            try {
+                if (control.getParentName() != null) {
+                    String parentName = control.getParentName();
+                    if (parentName.contains("prototype")){
+                        parentName = parentName.replace("prototype","");
+                    }
+                    Control parentNode = controlMap.get(parentName);
+                    if (parentNode == null) {
+                        System.out.println("parentNode is null: "+control);
+                        Control parentControl = new Control();
+                        parentControl.setName(parentName);
+                        parentControl.setStartLine(0);
+                        parentControl.setEndLine(0);
+                        controlMap.put("parentName",control);
+                        parentNode = parentControl;
+                    }
+                    control.setParentNode(parentNode);
+                    parentNode.getChildren().add(control);
+                } else {
+                    treeRoot.add(control);
                 }
-                control.setParentNode(parentNode);
-                assert parentNode != null;
-                parentNode.getChildren().add(control);
-            }else {
-                treeRoot.add(control);
+            }catch (Exception e){
+                System.out.println("getTree ERROR :"+control);
+                e.printStackTrace();
             }
         }
         return treeRoot;

@@ -5,6 +5,7 @@ import com.ecui.domain.Method;
 import com.ecui.domain.Param;
 import com.ecui.domain.Variable;
 
+import javax.sound.midi.Soundbank;
 import java.io.File;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -65,7 +66,7 @@ public class EcuiApiUtils {
     /**
      * 控件名
      */
-    private static Pattern CONTROLNAME = Pattern.compile("(?<=ui\\.)[a-zA-Z.]+");
+    private static Pattern CONTROLNAME = Pattern.compile("(?<=ui\\.)[$a-zA-Z.]+");
     /**
      * 控件内控件名
      */
@@ -108,17 +109,18 @@ public class EcuiApiUtils {
      * @param fileSet
      * @return
      */
-    public void scanFile(Set<File> fileSet) {
+    public void scanFile(Set<File> fileSet) throws Exception {
 
         //循环遍历所有文件
         for (File file : fileSet){
             //文件地址
+
             String path = file.getPath();
             Matcher pathMatcher = PATH.matcher(path);
-            if (pathMatcher.find()){
+            if (pathMatcher.find()) {
                 path = pathMatcher.group();
             }
-            path = "..."+path;
+            path = "..." + path;
             //将文件转换成行列表
             lineList = FileUtils.fileToLineList(file);
             //控件及其子控件集合
@@ -126,95 +128,115 @@ public class EcuiApiUtils {
             //方法集合
             currentMethodList = new LinkedList<Method>();
 
-            for (int i = 0; i < lineList.size(); i++) {
-                //当前所属控件（可能为空，意味着不在任何控件内
-                currentControl = getCurrentControl(i);
-                //当前所属方法(可能为空
-                currentMethod = getCurrentMethod(i);
-                String line = lineList.get(i).trim();
-                if (line.contains("core.inherits(")) {
-                    //发现新的控件继承关系
-                    //读取父控件
-                    String parentNode = lineList.get(i + 1).trim().substring(0, lineList.get(i + 1).trim().lastIndexOf(",")).trim();
-                    //拼装方法内控件名
-                    String node;
-                    if (line.contains(":")) {
-                        //控件内
-                        Matcher childControlMatcher = CHILDCONTROLNAME.matcher(line);
-                        childControlMatcher.find();
-                        node = childControlMatcher.group();
-                        if (parentNode.contains("prototype.")) {
-                            node = "prototype." + node;
-                            parentNode = parentNode.replaceFirst("prototype.", "");
-                        }
-                        if (currentControl != null) {
-                            node = currentControl.getName() + "." + node;
-                        } else {
-                            //获得当前文件名（去后缀，首字母大写，将-{} 转换成大写
-                            String fileName = file.getName().substring(0, file.getName().lastIndexOf("."));
-                            //将-X 转换成大写X
-                            fileName = joiner2Camel(fileName, '-');
-                            node = fileName + "." + node;
-                        }
-                        //生成控件
-                        getNewControl(node,parentNode,path,i);
-                    } else {
-                        //主控件
-                        if (line.startsWith("var")) {
-                            //内部私有控件，跳过扫描
-                            i = getEndLine(lineList,i,'(',')');
-                            continue;
-                        }
-                        Matcher controlNameMatcher = CONTROLNAME.matcher(line);
-                        controlNameMatcher.find();
-                        node = controlNameMatcher.group();
-                        //生成方法
-                        getNewControl(node,parentNode,path,i);
-                        //扫描头部注释
-                        scanFileHeader();
-                    }
-                }else if(currentControl != null) {
-                    //控件内代码
-                    //正则匹配
-                    Matcher variableMatcher = VARIABLE.matcher(line);
-                    Matcher methodMatcher = METHOD.matcher(line);
-                    Matcher constructionMethodMatcher = CONSTRUCTIONMETHOD.matcher(line);
-                    //找'_'开头的变量
-                    while (variableMatcher.find()) {
-                        Variable variable = new Variable(variableMatcher.group(), currentControl);
-                        if (!currentControl.getVariables().contains(variable)){
-                            //没有找到同名变量则新增
-                            currentControl.getVariables().add(variable);
-                        }
-                    }
-                    //匹配是否为方法
-                    if (constructionMethodMatcher.find()) {
-                        //构造方法
-                        getNewMethod("constructionMethod",true,i);
-                    }else if (methodMatcher.find()){
-                        //普通方法
-                        if (currentMethod !=null&& currentMethod.getConstruction()){
-                            //在构造方法内
-                            getNewMethod(methodMatcher.group(),true,i);
-                        }else {
-                            //不在构造方法内
-                            if (currentMethod ==null) {
-                                getNewMethod(methodMatcher.group(), false, i);
-                                //分析注释
-                                anlyzeNotesForMethod();
+            try {
+                for (int i = 0; i < lineList.size(); i++) {
+                    //当前所属控件（可能为空，意味着不在任何控件内
+                    currentControl = getCurrentControl(i);
+                    //当前所属方法(可能为空
+                    currentMethod = getCurrentMethod(i);
+                    String line = lineList.get(i).trim();
+                    try {
+                        if (line.contains("core.inherits(")) {
+                            //发现新的控件继承关系
+                            //读取父控件
+                            String parentNode = "";
+                            if (line.endsWith("core.inherits(")) {
+                                parentNode = lineList.get(i + 1).trim().substring(0, lineList.get(i + 1).trim().lastIndexOf(",")).trim();
+                            } else if (line.endsWith("),")) {
+                                parentNode = line.trim().substring(line.lastIndexOf("core.inherits(") + 14, line.lastIndexOf("),")).trim();
+                            }
+                            //拼装方法内控件名
+                            String node = "";
+                            if (line.contains(":")) {
+                                //控件内
+                                Matcher childControlMatcher = CHILDCONTROLNAME.matcher(line);
+                                childControlMatcher.find();
+                                node = childControlMatcher.group();
+                                if (parentNode.contains("prototype.")) {
+                                    node = "prototype." + node;
+                                    parentNode = parentNode.replaceFirst("prototype.", "");
+                                }
+                                if (currentControl != null) {
+                                    node = currentControl.getName() + "." + node;
+                                } else {
+                                    //获得当前文件名（去后缀，首字母大写，将-{} 转换成大写
+                                    String fileName = file.getName().substring(0, file.getName().lastIndexOf("."));
+                                    //将-X 转换成大写X
+                                    fileName = joiner2Camel(fileName, '-');
+                                    node = fileName + "." + node;
+                                }
+                                //生成控件
+                                getNewControl(node, parentNode, path, i);
+                            } else {
+                                //主控件
+                                if (line.startsWith("var")) {
+                                    //内部私有控件，跳过扫描
+                                    i = getEndLine(lineList, i, '(', ')');
+                                    continue;
+                                }
+                                Matcher controlNameMatcher = CONTROLNAME.matcher(line);
+                                if (controlNameMatcher.find()) {
+                                    node = controlNameMatcher.group();
+                                }else {
+                                    System.out.println("can not find controlName; file: "+file+" ;line: "+line+" ;lineNum: "+i);
+                                    i = getEndLine(lineList, i, '(', ')');
+                                    continue;
+                                }
+                                //生成方法
+                                getNewControl(node, parentNode, path, i);
+                                //扫描头部注释
+                                scanFileHeader();
+                            }
+                        } else if (currentControl != null) {
+                            //控件内代码
+                            //正则匹配
+                            Matcher variableMatcher = VARIABLE.matcher(line);
+                            Matcher methodMatcher = METHOD.matcher(line);
+                            Matcher constructionMethodMatcher = CONSTRUCTIONMETHOD.matcher(line);
+                            //找'_'开头的变量
+                            while (variableMatcher.find()) {
+                                Variable variable = new Variable(variableMatcher.group(), currentControl);
+                                if (!currentControl.getVariables().contains(variable)) {
+                                    //没有找到同名变量则新增
+                                    currentControl.getVariables().add(variable);
+                                }
+                            }
+                            //匹配是否为方法
+                            if (constructionMethodMatcher.find()) {
+                                //构造方法
+                                getNewMethod("constructionMethod", true, i);
+                            } else if (methodMatcher.find()) {
+                                //普通方法
+                                if (currentMethod != null && currentMethod.getConstruction()) {
+                                    //在构造方法内
+                                    getNewMethod(methodMatcher.group(), true, i);
+                                } else {
+                                    //不在构造方法内
+                                    if (currentMethod == null) {
+                                        getNewMethod(methodMatcher.group(), false, i);
+                                        //分析注释
+                                        anlyzeNotesForMethod();
+                                    }
+                                }
+                            } else if (currentMethod != null) {
+                                //方法内
+                                if (currentMethod.getConstruction() && "constructionMethod".equals(currentMethod.getName())) {
+                                    //构造方法内
+                                    if (line.replaceAll(" ", "").contains(".call(this,el,options)")) {
+                                        //包含.call()
+                                        currentControl.getAbnormal().remove(Control.Abnormal.HASNOCALL.getCode());
+                                    }
+                                }
                             }
                         }
-                    }else if (currentMethod !=null){
-                        //方法内
-                        if (currentMethod.getConstruction()&& "constructionMethod".equals(currentMethod.getName())) {
-                            //构造方法内
-                            if (line.replaceAll(" ","").contains(".call(this,el,options)")){
-                                //包含.call()
-                                currentControl.getAbnormal().remove(Control.Abnormal.HASNOCALL.getCode());
-                            }
-                        }
+                    }catch (Exception e){
+                        System.out.println("Find Error; file: "+ file + " ;path: " + path +" ;lineNum: " + i + " ;line: "+line);
+                        e.printStackTrace();
                     }
                 }
+            }catch (Exception e){
+                System.out.println("Find Error; file: "+ file + " ;path: " + path);
+                e.printStackTrace();
             }
         }
     }
