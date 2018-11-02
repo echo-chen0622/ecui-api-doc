@@ -33,7 +33,7 @@ public class Start {
 
         EcuiApiUtils ecuiApiUtils = new EcuiApiUtils();
         //获得所有文件集合
-        Set<File> fileSet = FileUtils.getFileLists(new File("D://chentiancheng/桌面/lib-fe-dev"+"/src").getAbsolutePath(),".js");
+        Set<File> fileSet = FileUtils.getFileLists(new File(jarPath+"/src").getAbsolutePath(),".js");
         //获得所有控件节点,和对应关系
         ecuiApiUtils.scanFile(fileSet);
         Map<String,Control> controlMap = ecuiApiUtils.getControlMap();
