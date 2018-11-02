@@ -94,7 +94,7 @@ public class Start {
         Template controlTem = engine.getTemplate("control.tpl");
         Template methodTem = engine.getTemplate("method.tpl");
         //控件树
-        String finalDocPath = jarPath+"/doc/";
+        String finalDocPath = jarPath+"/ecui-doc/";
         String indexPath = new File(finalDocPath).getAbsolutePath()+"/";
         judeDirExists(indexPath+"0");
         FileOutputStream fileWriter = new FileOutputStream(new File(indexPath+"controlTree.html").getAbsoluteFile());
